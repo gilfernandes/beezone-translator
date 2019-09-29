@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="app_bar_main_toolbar_title_text">Toolbar Title</string>
+    <string name="fragment_daily_app_id_text">Application</string>
+    <string name="fragment_home_menut1_text">Daily Challenge</string>
+    <string name="fragment_home_menut2_text">Virtuescope</string>
+    <string name="fragment_home_menut3_text">Mood Clinic</string>
+    <string name="fragment_home_menut4_text">Mind Gym</string>
+    <string name="fragment_home_menut5_text">Mind Lab</string>
+    <string name="fragment_home_menut6_text">Mind Spa</string>
+    <string name="fragment_mind_lab_home_mind_lab_heading_text">Mind Lab</string>
+    <string name="fragment_mind_lab_music_mind_lab_music_heading_text">Mind Lab</string>
+    <string name="fragment_mood_clinic_card_mood_clinic_card_title_text">Mind Lab</string>
+    <string name="fragment_traffic_control_tc_text_begin_view_text">Begin</string>
+    <string name="fragment_traffic_control_tc_text_end_view_text">End</string>
+    <string name="fragment_traffic_control_tc_text_end_text">Repeat</string>
+    <string name="fragment_traffic_control_tc_text_sound_text">Sound</string>
+    <string name="fragment_traffic_control_tc_text_turn_on_text">Turn on</string>
+</resources>
