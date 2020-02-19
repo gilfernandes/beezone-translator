@@ -11,7 +11,8 @@ const printHelp = () => {
 const printUsage = () => {
     console.log('Usage: node translationFileGenerator.js ' +
         '--beezone_xml <Path to Beezone XML> ' +
-        '--beezone_extra_xml <Path to extra XML file in Beezone> ' +
+        '--beezone_dc_xml <Path to daily challenge XML file in Beezone> ' +
+        '--beezone_mind_lab_xml <Path to Mind Lab XML file in Beezone> ' +
         '--virtuescope_js <Path to Virtuescope Javascript> ' +
         '--memory_js <Path to Memory Game Javascript>' +
         '--breathe_js <Path to Breathe Game Javascript>'
@@ -21,7 +22,8 @@ const printUsage = () => {
 const printExample = () => {
     console.log('Example: node translationFileGenerator.js ' +
         '--beezone_xml D:/dev/bk/beezone/BeeZone/app/src/main/res/values/strings.xml ' +
-        '--beezone_extra_xml D:/dev/bk/beezone/BeeZone/app/src/main/res/values/string_layouts.xml ' +
+        '--beezone_dc_xml D:/dev/bk/beezone/BeeZone/daily_challenge/src/main/res/values/strings.xml ' +
+        '--beezone_mind_lab_xml D:/dev/bk/beezone/BeeZone/mind_lab/src/main/res/values/strings.xml ' +
         '--virtuescope_js D:/dev/bk/beezone/BeeZone/app/src/main/assets/virtuescope/js/en_BZ.js ' +
         '--memory_js D:/dev/bk/beezone/BeeZone/app/src/main/assets/js/memory/en_BZ.js ' +
         '--breathe_js D:/dev/bk/beezone/BeeZone/app/src/main/assets/js/breathe/en_BZ.js'
@@ -95,7 +97,8 @@ var argv = require('minimist')(process.argv.slice(2), {
     alias: {
         h: 'help',
         bx: 'beezone_xml',
-        bxe: 'beezone_extra_xml',
+        bdc: 'beezone_dc_xml',
+        bml: 'beezone_mind_lab_xml',
         v: 'virtuescope_js',
         m: 'memory_js',
         b: 'breathe_js'
@@ -107,7 +110,7 @@ if (argv['h']) {
     printUsage();
     printExample();
 } else {
-    const mandatoryParams = ['bx', 'bxe', 'v', 'm', 'b'];
+    const mandatoryParams = ['bx', 'bdc', 'bml', 'v', 'm', 'b'];
     if (!utils.checkMandatoryParameters(argv, mandatoryParams)) {
         console.error('Missing mandatory arguments.');
         printUsage();
@@ -115,12 +118,16 @@ if (argv['h']) {
     } else {
         const finalTranslation = {
             beezone1: {},
-            beezone2: {},
+            beezoneDailyChallenge: {},
+            beezoneMindLab: {},
             vs: {}
         };
         processBeezone(argv['bx'], finalTranslation.beezone1)
             .then((beezoneStringObj) => {
-                return processBeezone(argv['bxe'], finalTranslation.beezone2);
+                return processBeezone(argv['bdc'], finalTranslation.beezoneDailyChallenge);
+            })
+            .then((beezoneStringObj) => {
+                return processBeezone(argv['bml'], finalTranslation.beezoneMindLab);
             })
             .then((beezoneStringObj) => {
                 return processVirtuescopeJs(argv['v'], finalTranslation.vs);
@@ -132,7 +139,9 @@ if (argv['h']) {
                 return processGame(argv['b'], finalTranslation, 'breathe');
             })
             .then((beezoneStringObj) => {
-                console.log(JSON.stringify(finalTranslation));
+                let finalJSON = JSON.stringify(finalTranslation);
+                console.log(finalJSON);
+                fs.writeFileSync('beezone_translation.json', finalJSON, 'utf8')
             })
             .catch((err) => {
                 console.log('An error occurred during processing.');

@@ -24,36 +24,22 @@ var argv = require('minimist')(process.argv.slice(2), {
     }
 });
 
-const createTargetFolder = (folder) => {
-    return new Promise((resolve, error) => {
-        fs.stat(folder, (err, status) => {
-            if (err) {
-                console.log(`Folder {folder} does not exist. Creating it now`);
-                fs.mkdir(folder, (err) => {
-                    if (err) {
-                        error(err);
-                    } else {
-                        console.log(`Folder {folder} created.`);
-                        resolve(folder);
-                    }
-                });
-            } else {
-                console.log(`Folder {folder} exists.`);
-                resolve(folder);
-            }
-        });
-    });
-
-};
-
 const processBeezoneStrings = (targetFolder, jsonContents, error, targetFile, sourceElement) => {
     let beezoneStrings = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n";
     beezoneStrings += '<resources>\n';
-    Object.entries(jsonContents[sourceElement]).forEach(([key, value]) => {
-        beezoneStrings += `    <string name="${key}">${value}</string>\n`;
+    const entries = Object.entries(jsonContents[sourceElement]).map(function (e) {
+            return {"key": e[0], "value": e[1]}
+        }
+    );
+    // sort by key
+    entries.sort(function (a, b) {
+        return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+    });
+    entries.forEach((e) => {
+        beezoneStrings += `    <string name="${e.key}">${e.value}</string>\n`;
     });
     beezoneStrings += '</resources>';
-    fs.writeFile(targetFile, beezoneStrings, (err) => {
+    fs.writeFile(targetFile, beezoneStrings, 'utf8', (err) => {
         if (err) {
             error(err);
         }
@@ -71,14 +57,19 @@ const processTranslationFile = (translationFile, targetFolder) => {
                         error(err);
                     } else {
                         const jsonContents = JSON.parse(contents);
-                        processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings.xml`, 'beezone1');
-                        processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/string_layouts.xml`, 'beezone2');
                         resolve({targetFolder, jsonContents});
                     }
                 });
-
             }
         });
+    });
+};
+
+const processJson = (targetFolder, jsonContents) => {
+    return new Promise((resolve, error) => {
+        processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings.xml`, 'beezone1');
+        processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings_beezoneDailyChallenge.xml`, 'beezoneDailyChallenge');
+        resolve({targetFolder, jsonContents});
     });
 };
 
@@ -92,7 +83,7 @@ const writeVS = (jsonContents, targetFolder) => new Promise((resolve, error) => 
     vsJS = removeEnclosingBrackets(vsJS)
         .replace(/"(.+?)":\s*{/gm, '$1 = {')
         .replace(/(}),/gm, '$1;');
-    fs.writeFile(`${targetFolder}/${argv['lc']}_BZ.js`, vsJS, (err) => {
+    fs.writeFile(`${targetFolder}/${argv['lc']}_BZ.js`, vsJS, 'utf8', (err) => {
         if (err) {
             error(err);
         } else {
@@ -108,7 +99,7 @@ const extractGame = (jsonContents, targetFolder, gameKey, gameName) => new Promi
         if (err) {
             error(err);
         } else {
-            fs.writeFile(`${targetFolder}/${gameName}/${argv['lc']}_BZ.js`, js, (err) => {
+            fs.writeFile(`${targetFolder}/${gameName}/${argv['lc']}_BZ.js`, js, 'utf8', (err) => {
                 if (err) {
                     error(err);
                 } else {
@@ -128,18 +119,25 @@ if (argv['h']) {
         console.error('Missing mandatory arguments.');
         printUsage();
     } else {
-        createTargetFolder(argv['tfd'])
+        utils.createTargetFolder(argv['tfd'])
             .then((folder) => {
                 console.log(`Generating files into ${folder}.`);
                 return processTranslationFile(argv['tf'], folder);
             })
             .then(({targetFolder, jsonContents}) => {
+                console.log(`Processing JSON.`);
+                return processJson(targetFolder, jsonContents);
+            })
+            .then(({targetFolder, jsonContents}) => {
+                console.log(`Processing VS.`);
                 return writeVS(jsonContents, targetFolder);
             })
             .then(({targetFolder, jsonContents}) => {
+                console.log(`Processing Memory.`);
                 return extractGame(jsonContents, targetFolder, 'memory', 'memory');
             })
             .then(({targetFolder, jsonContents}) => {
+                console.log(`Processing breathe.`);
                 return extractGame(jsonContents, targetFolder, 'breathe', 'breathe');
             })
             .catch((err) => {
