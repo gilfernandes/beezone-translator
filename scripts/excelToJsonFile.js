@@ -46,6 +46,7 @@ if (argv['h']) {
         }, {});
         const beezone1 = extractSheet(sheetMap, 'Beezone 1');
         const beezoneDailyChallenge = extractSheet(sheetMap, 'Beezone Daily Challenge');
+        const beezoneMindLab = extractSheet(sheetMap, 'Beezone Mind Lab');
         // const vsVirtues = extractSheet(sheetMap, 'Virtuescope virtues');
         const vsMonths = extractSheet(sheetMap, 'Virtuescope months');
         const vsStrings = extractSheet(sheetMap, 'Virtuescope strings');
@@ -56,6 +57,7 @@ if (argv['h']) {
         const finalJsonObj = {
             beezone1,
             beezoneDailyChallenge,
+            beezoneMindLab,
             vs: {
                 // virtueTexts: vsVirtues,
                 months: vsMonths,

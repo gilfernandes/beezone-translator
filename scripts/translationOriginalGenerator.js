@@ -46,6 +46,26 @@ const processBeezoneStrings = (targetFolder, jsonContents, error, targetFile, so
     });
 };
 
+const processBeezoneIOSStrings = (targetFolder, jsonContents, error, targetFile, sourceElement) => {
+    let beezoneStrings = "";
+    const entries = Object.entries(jsonContents[sourceElement]).map(function (e) {
+            return {"key": e[0], "value": e[1]}
+        }
+    );
+    // sort by key
+    entries.sort(function (a, b) {
+        return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+    });
+    entries.forEach((e) => {
+        beezoneStrings += `"${e.key}" = "${e.value}";\n`;
+    });
+    fs.writeFile(targetFile, beezoneStrings, 'utf8', (err) => {
+        if (err) {
+            error(err);
+        }
+    });
+};
+
 const processTranslationFile = (translationFile, targetFolder) => {
     return new Promise((resolve, error) => {
         fs.stat(translationFile, (err, status) => {
@@ -68,7 +88,11 @@ const processTranslationFile = (translationFile, targetFolder) => {
 const processJson = (targetFolder, jsonContents) => {
     return new Promise((resolve, error) => {
         processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings.xml`, 'beezone1');
+        processBeezoneIOSStrings(targetFolder, jsonContents, error, `${targetFolder}/main_ios.txt`, 'beezone1');
         processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings_beezoneDailyChallenge.xml`, 'beezoneDailyChallenge');
+        processBeezoneIOSStrings(targetFolder, jsonContents, error, `${targetFolder}/beezoneDailyChallenge_ios.txt`, 'beezoneDailyChallenge');
+        processBeezoneStrings(targetFolder, jsonContents, error, `${targetFolder}/strings_beezoneMindLab.xml`, 'beezoneMindLab');
+        processBeezoneIOSStrings(targetFolder, jsonContents, error, `${targetFolder}/beezoneMindLab_ios.txt`, 'beezoneMindLab');
         resolve({targetFolder, jsonContents});
     });
 };
