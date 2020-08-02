@@ -141,7 +141,9 @@ if (argv['h']) {
             .then((beezoneStringObj) => {
                 let finalJSON = JSON.stringify(finalTranslation);
                 console.log(finalJSON);
-                fs.writeFileSync('beezone_translation.json', finalJSON, 'utf8')
+                const targetFile = 'beezone_translation.json';
+                console.log(`Writing ${targetFile}`);
+                fs.writeFileSync(targetFile, finalJSON, 'utf8')
             })
             .catch((err) => {
                 console.log('An error occurred during processing.');

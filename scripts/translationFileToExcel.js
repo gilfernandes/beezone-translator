@@ -103,6 +103,7 @@ if (argv['h']) {
             })
             .then(({targetFolder, jsonContents}) => {
                 jsonContents_en = jsonContents;
+                console.log(`Target folder: ${targetFolder}`);
                 return utils.processTranslationFile(argv['tf_hi'], targetFolder);
             })
             .then(({targetFolder, jsonContents}) => {
